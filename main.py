@@ -1,12 +1,13 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from auth import router as auth_router
 import models
-from utils.dbUtil import SessionLocal, engine
+from utils.dbUtil import engine
 from users import router as user_router
 from opts import router as otp_router
+from auth import router as auth_router
 from vendor import router as vendor_router
 from review import router as review_router
+from admin import router as admin_router
 
 
 models.Base.metadata.create_all(bind=engine)
@@ -40,3 +41,4 @@ app.include_router(user_router.router, tags=["User"])
 app.include_router(otp_router.router, tags=["OTP"])
 app.include_router(vendor_router.router, tags=["Vendor"])
 app.include_router(review_router.router, tags=["Review"])
+app.include_router(admin_router.router, tags=["Admin"])

@@ -1,6 +1,9 @@
 fastapi
 uvicorn
 starlette
+azure-core==1.26.1
+azure-storage-blob==12.14.1
+azure-identity
 pytz
 databases
 sqlalchemy

@@ -128,6 +128,20 @@ async def get_avg_overall_rating(db: Session, vendor_id: UUID):
         return _res.overall_rating / count
 
 
+async def get_count_overall_rating(db: Session, vendor_id: UUID):
+    count = (
+        db.query(models.Review.overall_rating)
+        .filter(
+            and_(
+                models.Review.vendor_id == vendor_id,
+                models.Review.status == True,
+            )
+        )
+        .all()
+    )
+    return count
+
+
 async def update_review(
     db: Session,
     vendor_id: UUID,

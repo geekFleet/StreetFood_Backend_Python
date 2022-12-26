@@ -1,11 +1,15 @@
+import os
+import logging
 from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from users import schemas as user_schema
 from auth import schemas as auth_schema
-from utils import cryptoUtil, jwtUtil
+from utils import cryptoUtil, jwtUtil, azur_blob
 from users import crud as user_crud
 from auth import crud as auth_crud
 from utils.dbUtil import get_db
 from sqlalchemy.orm import Session
+from uuid import UUID
+
 
 router = APIRouter(prefix="/api/v1")
 
@@ -42,6 +46,7 @@ async def deactivate_account(
 async def get_profile_image(
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
 ):
+
     return {"detail": "Todo"}
 
 
@@ -50,7 +55,31 @@ async def upload_profile_image(
     file: UploadFile = File(...),
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
 ):
-    return "Todo"
+    try:
+        cwd = os.getcwd()
+        path_image_dir = "profile-images/"
+        full_image_path = os.path.join(cwd, path_image_dir, file.filename)
+
+        # Create directory if not exist
+        if not os.path.exists(path_image_dir):
+            os.mkdir(path_image_dir)
+
+        # Rename file
+        file_name = full_image_path.replace(
+            file.filename, str(currentUser.user_id) + ".jpg"
+        )
+
+        # Write file
+        with open(file_name, "wb+") as f:
+            f.write(file.file.read())
+            f.flush()
+            f.close()
+        obj_azur = azur_blob.azure_blob_file_uploader
+        obj_azur.upload_all_images_in_folder()
+        return "Image uploaded Succesfully!"
+
+    except Exception as e:
+        logging.log(e)
 
 
 @router.post("/user/change-password")

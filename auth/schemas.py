@@ -26,6 +26,7 @@ class UserList(BaseModel):
     created_on: Optional[datetime] = None
     status: bool
     verify: bool
+    role: str
 
     class Config:
         orm_mode = True
