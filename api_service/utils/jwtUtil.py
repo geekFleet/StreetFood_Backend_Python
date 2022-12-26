@@ -71,6 +71,7 @@ async def get_current_user(
         created_on=user.created_on,
         status=user.status,
         verify=user.verify,
+        role=user.role,
     )
 
 

@@ -48,8 +48,18 @@ async def login(
         data={"sub": form_data.username},
         expires_delta=access_token_expires,
     )
+    results = {"access_token": access_token, "token_type": "bearer"}
 
-    return {"access_token": access_token, "token_type": "bearer"}
+    results.update(
+        {
+            "user_info": {
+                "email": user.email,
+                "fullname": user.fullname,
+                "phone_number": user.phone_number,
+            }
+        }
+    )
+    return results
 
 
 @router.post("/auth/forgot-password")
