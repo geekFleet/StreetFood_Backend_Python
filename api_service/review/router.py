@@ -49,7 +49,7 @@ async def get_overall_review_for_vendor(
     vendor_id: UUID,
     db: Session = Depends(get_db),
 ):
-    row = vendor_cud.find_existed_vendor_by_id(db, vendor_id)
+    row = await vendor_cud.find_existed_vendor_by_id(db, vendor_id)
     if not row:
         raise HTTPException(status_code=404, detail="Vendor doesnot extist!")
     overall_taste = await crud.get_avg_taste(db, vendor_id)
@@ -65,6 +65,37 @@ async def get_overall_review_for_vendor(
         "overall_sevice": overall_sevice,
         "overall_rating": overall_rating,
     }
+
+
+@router.get("/review/vendor/count")
+async def get_overall_review_count_for_vendor(
+    vendor_id: UUID,
+    db: Session = Depends(get_db),
+):
+    row = await vendor_cud.find_existed_vendor_by_id(db, vendor_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="Vendor doesnot extist!")
+
+    count = await crud.get_count_overall_rating(db, vendor_id)
+
+    star_5 = 0
+    star_4 = 0
+    star_3 = 0
+    star_2 = 0
+    star_1 = 0
+    for _ in count:
+        if _.overall_rating > 4:
+            star_5 += 1
+        elif _.overall_rating > 3 and _.overall_rating < 4:
+            star_4 += 1
+        elif _.overall_rating > 2 and _.overall_rating < 3:
+            star_3 += 1
+        elif _.overall_rating > 1 and _.overall_rating < 2:
+            star_2 += 1
+        else:
+            star_1 += 1
+
+    return
 
 
 @router.get("/review/all")
