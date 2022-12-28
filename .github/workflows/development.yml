@@ -1,0 +1,47 @@
+name: Development
+
+env:
+  AZURE_WEBAPP_NAME: StreetFoods_api   # set this to your application's name
+
+on:
+  push:
+    branches:
+      - development
+
+permissions:
+  contents: 'read'
+  packages: 'write'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to GitHub container registry
+        uses: docker/login-action@v1.10.0
+        with:
+          registry: streetfoods.azurecr.io
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.TOKEN }}
+
+      - name: Lowercase the repo name
+        run: echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: streetfoods.azurecr.io/backend:${{ github.sha }}
+          file: ./Dockerfile
+      
+      - name: Deploy
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'streetfoods-dev-py'
+          publish-profile: ${{ secrets.azureWebAppPublishProfile }}
+          images: 'streetfoods.azurecr.io/backend:${{ github.sha }}'
