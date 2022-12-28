@@ -4,6 +4,7 @@ from sqlalchemy import and_
 from users import schemas as user_schema
 from auth import schemas as auth_schema
 import models
+from models import current_date
 
 
 async def update_user(
@@ -31,6 +32,7 @@ async def update_user(
                 models.User.email: currentUser.email
                 if request.email is None
                 else request.email,
+                models.User.last_updated_on: current_date,
             }
         )
     )

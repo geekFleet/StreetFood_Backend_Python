@@ -4,12 +4,12 @@ starlette
 azure-core==1.26.1
 azure-storage-blob==12.14.1
 azure-identity
+pyodbc==4.0.35
 pytz
-databases
 sqlalchemy
 pydantic[dotenv]
 asyncpg
-psycopg2
+# psycopg2
 passlib
 pyjwt
 python-jose[cryptography]

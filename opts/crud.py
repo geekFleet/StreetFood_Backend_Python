@@ -1,8 +1,12 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import text, func
 from sqlalchemy import and_
 import models
 from opts import schemas
+from datetime import datetime, timedelta
+from sqlalchemy.sql import text
+import pytz
+
+current_date = datetime.now()
 
 
 async def save_otp(
@@ -21,7 +25,7 @@ async def find_otp_block(db: Session, phone_number: int):
     query = db.query(models.OtpBlock).filter(
         and_(
             models.OtpBlock.phone_number == phone_number,
-            models.OtpBlock.created_on >= (func.now() - text("interval '5 minutes'")),
+            models.OtpBlock.created_on >= (current_date - timedelta(minutes=5)),
         )
     )
     return query.first()
@@ -32,7 +36,7 @@ async def find_otp_life_time(db: Session, phone_number: int, session_id: str):
         and_(
             models.Otp.phone_number == phone_number,
             models.Otp.session_id == session_id,
-            models.Otp.created_on >= (func.now() - text("interval '10 minutes'")),
+            # models.Otp.created_on >= (current_date - timedelta(seconds=10)),
         )
     )
     return query.first()

@@ -1,37 +1,21 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
-from functools import lru_cache
-import config
+from sqlalchemy.engine import URL
+import pyodbc
+import os
 
 
-# 1. using Pydantic to load configuration
-@lru_cache()
-def setting():
-    return config.Settings()
+connection_string = os.environ["CONNECTION_STRING"]
 
+cnxn = pyodbc.connect(connection_string)
+cursor = cnxn.cursor()
 
-def database_pgsql_url_config():
-    """
-    Create a database URL for SQLAlchemy
-    """
-    return str(
-        setting().DB_CONNECTION
-        + "://"
-        + setting().DB_USERNAME
-        + ":"
-        + setting().DB_PASSWORD
-        + "@"
-        + setting().DB_HOST
-        + ":"
-        + setting().DB_PORT
-        + "/"
-        + setting().DB_DATABASE
-    )
+connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
 
+# # Create the SQLAlchemy engine
+engine = create_engine(connection_url)
 
-# Create the SQLAlchemy engine
-engine = create_engine(database_pgsql_url_config())
 
 # Create a SessionLocal class whose instances are a database session
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
