@@ -39,7 +39,7 @@ jobs:
           tags: streetfoods.azurecr.io/backend:${{ github.sha }}
           file: ./Dockerfile
       
-      - uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'streetfoods-dev-py'
-          images: 'streetfoods.azurecr.io/backend:${{ github.sha }}'
+#       - uses: azure/webapps-deploy@v2
+#         with:
+#           app-name: 'streetfoods-dev-py'
+#           images: 'streetfoods.azurecr.io/backend:${{ github.sha }}'
