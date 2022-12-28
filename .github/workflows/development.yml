@@ -1,4 +1,4 @@
-name: Build and deploy a container to an Azure Web App
+name: Development
 
 env:
   AZURE_WEBAPP_NAME: StreetFoods_api   # set this to your application's name
@@ -38,3 +38,8 @@ jobs:
           push: true
           tags: streetfoods.azurecr.io/backend:${{ github.sha }}
           file: ./Dockerfile
+      
+      - uses: azure/webapps-deploy@v2
+        with:
+          app-name: 'streetfoods-dev-py'
+          images: 'streetfoods.azurecr.io/backend:${{ github.sha }}'
