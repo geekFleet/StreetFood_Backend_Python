@@ -3,8 +3,8 @@ from sqlalchemy import and_
 import models
 from uuid import UUID
 from vendor import schemas
-from sqlalchemy.sql import func
 from auth import schemas as auth_schema
+from models import current_date
 
 
 async def save_vendor(
@@ -66,7 +66,7 @@ async def update_vendor(
                 models.Vendor.evening_timing: currentVendor.evening_timing
                 if request.evening_timing is None
                 else request.evening_timing,
-                models.Vendor.last_updated_on: func.now(),
+                models.Vendor.last_updated_on: current_date,
             }
         )
     )
@@ -74,11 +74,12 @@ async def update_vendor(
     return query
 
 
-async def get_all_vendor(db: Session, skip: int = 0, limit: int = 100):
+async def get_all_vendor(db: Session, page: int = 1, per_page: int = 100):
     return (
         db.query(models.Vendor)
         .filter(models.Vendor.status == True)
-        .offset(skip)
-        .limit(limit)
+        .order_by(models.Vendor.vendor_id)
+        .offset((page - 1) * per_page)
+        .limit(per_page)
         .all()
     )

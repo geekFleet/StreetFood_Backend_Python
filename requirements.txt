@@ -9,7 +9,6 @@ pytz
 sqlalchemy
 pydantic[dotenv]
 asyncpg
-# psycopg2
 passlib
 pyjwt
 python-jose[cryptography]
@@ -17,3 +16,10 @@ bcrypt
 python-multipart
 fastapi-mail
 Pillow
+
+# dev
+
+black==22.6.0
+flake8==5.0.4
+pyflakes==2.5.0
+isort==5.10.1

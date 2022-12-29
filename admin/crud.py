@@ -1,16 +1,18 @@
 import models
 from sqlalchemy.orm import Session
 from uuid import UUID
+from sqlalchemy import and_
 from auth import schemas as auth_schema
 from users import schemas as user_schema
 
 
-async def get_all_users(db: Session, skip: int = 0, limit: int = 100):
+async def get_all_users(db: Session, page: int = 1, per_page: int = 100):
     return (
         db.query(models.User)
         .filter(models.User.status == True)
-        .offset(skip)
-        .limit(limit)
+        .order_by(models.User.user_id)
+        .offset((page - 1) * per_page)
+        .limit(per_page)
         .all()
     )
 
@@ -64,6 +66,36 @@ async def update_user_admin(
                 else request.email,
             }
         )
+    )
+    db.commit()
+    return query
+
+
+async def delete_vendor(db: Session, vendor_id: UUID):
+    query = (
+        db.query(models.Vendor)
+        .filter(
+            and_(
+                models.Vendor.user_id == vendor_id,
+                models.User.status == True,
+            )
+        )
+        .delete()
+    )
+    db.commit()
+    return query
+
+
+async def deactivate_vendor(db: Session, vendor_id: UUID):
+    query = (
+        db.query(models.Vendor)
+        .filter(
+            and_(
+                models.Vendor.vendor_id == vendor_id,
+                models.Vendor.status == True,
+            )
+        )
+        .update({models.Vendor.status: False})
     )
     db.commit()
     return query

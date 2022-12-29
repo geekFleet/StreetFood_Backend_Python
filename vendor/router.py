@@ -37,7 +37,7 @@ async def register(
 
 
 @router.patch("/vendor/update")
-async def update_user(
+async def update_vendor(
     vendor_id: UUID,
     request: schemas.UpdateVendor,
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
@@ -74,7 +74,7 @@ async def get_vendor_profile_by_id(
 
 @router.get("/vendor")
 async def get_all_vendors(
-    skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+    page: int = 1, per_page: int = 100, db: Session = Depends(get_db)
 ):
-    vendors = await crud.get_all_vendor(db, skip, limit)
+    vendors = await crud.get_all_vendor(db, page, per_page)
     return vendors

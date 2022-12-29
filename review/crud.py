@@ -3,8 +3,8 @@ from sqlalchemy import and_
 import models
 from uuid import UUID
 from review import schemas
-from sqlalchemy.sql import func
 from auth import schemas as auth_schema
+from models import current_date
 
 
 async def save_review(
@@ -29,12 +29,12 @@ async def save_review(
 async def get_review_by_user_id(
     db: Session,
     vendor_id: UUID,
-    currentUser: auth_schema.UserList,
+    user_id: UUID,
 ):
     query = db.query(models.Review).filter(
         and_(
             models.Review.vendor_id == vendor_id,
-            models.Review.created_by == currentUser.user_id,
+            models.Review.created_by == user_id,
             models.Review.status == True,
         )
     )
@@ -145,16 +145,16 @@ async def get_count_overall_rating(db: Session, vendor_id: UUID):
 async def update_review(
     db: Session,
     vendor_id: UUID,
+    user_id: UUID,
     request: schemas.UpdateReview,
     currentReview: schemas.UpdateReview,
-    currentUser: auth_schema.UserList,
 ):
     query = (
         db.query(models.Review)
         .filter(
             and_(
                 models.Review.vendor_id == vendor_id,
-                models.Review.created_by == currentUser.user_id,
+                models.Review.created_by == user_id,
                 models.Review.status == True,
             )
         )
@@ -175,7 +175,7 @@ async def update_review(
                 models.Review.description: currentReview.description
                 if request.description is None
                 else request.description,
-                models.Review.last_updated_on: func.now(),
+                models.Review.last_updated_on: current_date,
             }
         )
     )
@@ -187,14 +187,14 @@ async def update_overall_rating(
     db: Session,
     vendor_id: UUID,
     overall_rating: float,
-    currentUser: auth_schema.UserList,
+    user_id: UUID,
 ):
     query = (
         db.query(models.Review)
         .filter(
             and_(
                 models.Review.vendor_id == vendor_id,
-                models.Review.created_by == currentUser.user_id,
+                models.Review.created_by == user_id,
                 models.Review.status == True,
             )
         )
@@ -206,14 +206,16 @@ async def update_overall_rating(
 
 
 async def delete_review(
-    db: Session, vendor_id: UUID, currentUser: auth_schema.UserList
+    db: Session,
+    vendor_id: UUID,
+    user_id: UUID,
 ):
     query = (
         db.query(models.Review)
         .filter(
             and_(
                 models.Review.vendor_id == vendor_id,
-                models.Review.created_by == currentUser.user_id,
+                models.Review.created_by == user_id,
                 models.Review.status == True,
             )
         )

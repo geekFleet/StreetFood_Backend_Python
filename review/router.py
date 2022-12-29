@@ -19,7 +19,7 @@ async def register(
     db: Session = Depends(get_db),
 ):
 
-    review_row = await crud.get_review_by_user_id(db, vendor_id, currentUser)
+    review_row = await crud.get_review_by_user_id(db, vendor_id, currentUser.user_id)
 
     if review_row:
         raise HTTPException(status_code=404, detail="Review already registered!")
@@ -38,7 +38,7 @@ async def get_review_for_current_user(
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    review = await crud.get_review_by_user_id(db, vendor_id, currentUser)
+    review = await crud.get_review_by_user_id(db, vendor_id, currentUser.user_id)
     if not review:
         raise HTTPException(status_code=404, detail="Review doesnot extist!")
     return review
@@ -95,7 +95,7 @@ async def get_overall_review_count_for_vendor(
         else:
             star_1 += 1
 
-    return
+    return "todo"
 
 
 @router.get("/review/all")
@@ -115,7 +115,7 @@ async def update_review(
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    review = await crud.get_review_by_user_id(db, vendor_id, currentUser)
+    review = await crud.get_review_by_user_id(db, vendor_id, currentUser.user_id)
     if not review:
         raise HTTPException(status_code=404, detail="Review doesnot extist!")
     currentreview = schemas.UpdateReview(
@@ -126,11 +126,11 @@ async def update_review(
         description=review.description,
     )
     # Update user
-    await crud.update_review(db, vendor_id, request, currentreview, currentUser)
+    await crud.update_review(db, vendor_id, request, currentreview, currentUser.user_id)
     overall_rating = (
         review.taste + review.price_to_quality + review.hygiene + review.service
     ) / 4
-    await crud.update_overall_rating(db, vendor_id, overall_rating, currentUser)
+    await crud.update_overall_rating(db, vendor_id, overall_rating, currentUser.user_id)
     return {"status_code": 200, "detail": "Review updated successfully"}
 
 
@@ -140,9 +140,9 @@ async def delete_review(
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
     db: Session = Depends(get_db),
 ):
-    review = await crud.get_review_by_user_id(db, vendor_id, currentUser)
+    review = await crud.get_review_by_user_id(db, vendor_id, currentUser.user_id)
     if not review:
         raise HTTPException(status_code=404, detail="Review doesnot extist!")
     # Delete user
-    await crud.delete_review(db, vendor_id, currentUser)
+    await crud.delete_review(db, vendor_id, currentUser.user_id)
     return {"status_code": 200, "detail": "Review deleted successfully"}
