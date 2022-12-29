@@ -16,7 +16,7 @@ import uuid
 import pytz
 
 
-current_date = datetime.now()
+current_date = datetime.now(pytz.timezone("Asia/Calcutta"))
 
 
 class User(Base):

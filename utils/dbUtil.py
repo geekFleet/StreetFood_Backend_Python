@@ -2,14 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine import URL
-import pyodbc
 import os
 
 
 connection_string = os.environ["CONNECTION_STRING"]
-
-cnxn = pyodbc.connect(connection_string)
-cursor = cnxn.cursor()
 
 connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
 

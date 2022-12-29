@@ -5,12 +5,8 @@ from opts import schemas
 from opts import crud
 from utils.dbUtil import get_db
 from sqlalchemy.orm import Session
-from sqlalchemy.sql import text
 from auth import crud as auth_crud
-from datetime import datetime, timedelta
-import pytz
 
-current_date = datetime.now()
 router = APIRouter(prefix="/api/v1")
 
 
@@ -58,7 +54,7 @@ async def verify_otp(request: schemas.VerifyOTP, db: Session = Depends(get_db)):
     otp_result = await crud.find_otp_life_time(
         db, request.phone_number, request.session_id
     )
-    if not otp_result.created_on >= (current_date - timedelta(seconds=10)):
+    if not otp_result:
         raise HTTPException(
             status_code=404, detail="OTP code has expired, please request a new one."
         )
