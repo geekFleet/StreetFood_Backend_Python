@@ -27,12 +27,8 @@ async def register(
     # Create vendor
     await crud.save_vendor(db, user, currentUser)
     vendor = await crud.find_existed_vendor(db, user.vendor_name, user.location)
-    overall_rating = (
-        review.taste + review.service + review.hygiene + review.price_to_quality
-    ) / 4
-    await review_crud.save_review(
-        db, vendor.vendor_id, review, overall_rating, currentUser
-    )
+    overall_rating = (review.taste + review.service + review.hygiene + review.price_to_quality) / 4
+    await review_crud.save_review(db, vendor.vendor_id, review, overall_rating, currentUser)
     return {**user.dict()}, {**review.dict()}
 
 
@@ -73,8 +69,6 @@ async def get_vendor_profile_by_id(
 
 
 @router.get("/vendor")
-async def get_all_vendors(
-    page: int = 1, per_page: int = 100, db: Session = Depends(get_db)
-):
+async def get_all_vendors(page: int = 1, per_page: int = 100, db: Session = Depends(get_db)):
     vendors = await crud.get_all_vendor(db, page, per_page)
     return vendors

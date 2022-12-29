@@ -24,9 +24,7 @@ async def register(
     if review_row:
         raise HTTPException(status_code=404, detail="Review already registered!")
 
-    overall_rating = (
-        review.taste + review.service + review.hygiene + review.price_to_quality
-    ) / 4
+    overall_rating = (review.taste + review.service + review.hygiene + review.price_to_quality) / 4
     # Create vendor
     await crud.save_review(db, vendor_id, review, overall_rating, currentUser)
     return {**review.dict()}
@@ -100,9 +98,9 @@ async def get_overall_review_count_for_vendor(
 
 @router.get("/review/all")
 async def get_all_review_for_vendor(
-    vendor_id: UUID, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
+    vendor_id: UUID, page: int = 1, per_page: int = 100, db: Session = Depends(get_db)
 ):
-    review = await crud.get_all_review(db, vendor_id, skip, limit)
+    review = await crud.get_all_review(db, vendor_id, page, per_page)
     if not review:
         raise HTTPException(status_code=404, detail="Review doesnot extist!")
     return review
@@ -127,9 +125,7 @@ async def update_review(
     )
     # Update user
     await crud.update_review(db, vendor_id, request, currentreview, currentUser.user_id)
-    overall_rating = (
-        review.taste + review.price_to_quality + review.hygiene + review.service
-    ) / 4
+    overall_rating = (review.taste + review.price_to_quality + review.hygiene + review.service) / 4
     await crud.update_overall_rating(db, vendor_id, overall_rating, currentUser.user_id)
     return {"status_code": 200, "detail": "Review updated successfully"}
 

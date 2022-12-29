@@ -3,6 +3,7 @@ from sqlalchemy import and_
 import models
 from uuid import UUID
 from review import schemas
+from sqlalchemy.sql import func
 from auth import schemas as auth_schema
 from models import current_date
 
@@ -41,14 +42,13 @@ async def get_review_by_user_id(
     return query.first()
 
 
-async def get_all_review(db: Session, vendor_id: UUID, skip: int = 0, limit: int = 100):
+async def get_all_review(db: Session, vendor_id: UUID, page: int = 1, per_page: int = 100):
     return (
         db.query(models.Review)
-        .filter(
-            and_(models.Review.vendor_id == vendor_id, models.Review.status == True)
-        )
-        .offset(skip)
-        .limit(limit)
+        .filter(and_(models.Review.vendor_id == vendor_id, models.Review.status == True))
+        .order_by(models.Review.last_updated_on)
+        .offset((page - 1) * per_page)
+        .limit(per_page)
         .all()
     )
 
@@ -59,9 +59,7 @@ async def get_avg_taste(db: Session, vendor_id: UUID):
     ).group_by(models.Review.vendor_id)
     count = (
         db.query(models.Review.taste)
-        .filter(
-            and_(models.Review.vendor_id == vendor_id, models.Review.status == True)
-        )
+        .filter(and_(models.Review.vendor_id == vendor_id, models.Review.status == True))
         .count()
     )
     for _res in query.all():
@@ -74,9 +72,7 @@ async def get_avg_hygiene(db: Session, vendor_id: UUID):
     ).group_by(models.Review.vendor_id)
     count = (
         db.query(models.Review.hygiene)
-        .filter(
-            and_(models.Review.vendor_id == vendor_id, models.Review.status == True)
-        )
+        .filter(and_(models.Review.vendor_id == vendor_id, models.Review.status == True))
         .count()
     )
     for _res in query.all():
@@ -89,9 +85,7 @@ async def get_avg_price_to_quality(db: Session, vendor_id: UUID):
     ).group_by(models.Review.vendor_id)
     count = (
         db.query(models.Review.price_to_quality)
-        .filter(
-            and_(models.Review.vendor_id == vendor_id, models.Review.status == True)
-        )
+        .filter(and_(models.Review.vendor_id == vendor_id, models.Review.status == True))
         .count()
     )
     for _res in query.all():
@@ -104,9 +98,7 @@ async def get_avg_service(db: Session, vendor_id: UUID):
     ).group_by(models.Review.vendor_id)
     count = (
         db.query(models.Review.service)
-        .filter(
-            and_(models.Review.vendor_id == vendor_id, models.Review.status == True)
-        )
+        .filter(and_(models.Review.vendor_id == vendor_id, models.Review.status == True))
         .count()
     )
     for _res in query.all():
@@ -119,9 +111,7 @@ async def get_avg_overall_rating(db: Session, vendor_id: UUID):
     ).group_by(models.Review.vendor_id)
     count = (
         db.query(models.Review.overall_rating)
-        .filter(
-            and_(models.Review.vendor_id == vendor_id, models.Review.status == True)
-        )
+        .filter(and_(models.Review.vendor_id == vendor_id, models.Review.status == True))
         .count()
     )
     for _res in query.all():

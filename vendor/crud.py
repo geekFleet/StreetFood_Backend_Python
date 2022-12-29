@@ -7,9 +7,7 @@ from auth import schemas as auth_schema
 from models import current_date
 
 
-async def save_vendor(
-    db: Session, user: schemas.RequestVendor, currentUser: auth_schema.UserList
-):
+async def save_vendor(db: Session, user: schemas.RequestVendor, currentUser: auth_schema.UserList):
     db_item = models.Vendor(
         **user.dict(),
         created_by=currentUser.user_id,
@@ -46,9 +44,7 @@ async def update_vendor(
 ):
     query = (
         db.query(models.Vendor)
-        .filter(
-            and_(models.Vendor.vendor_id == vendor_id, models.Vendor.status == True)
-        )
+        .filter(and_(models.Vendor.vendor_id == vendor_id, models.Vendor.status == True))
         .update(
             {
                 models.Vendor.vendor_name: currentVendor.vendor_name
