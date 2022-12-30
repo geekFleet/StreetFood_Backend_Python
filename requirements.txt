@@ -5,6 +5,7 @@ azure-core==1.26.1
 azure-storage-blob==12.14.1
 azure-identity
 pyodbc==4.0.35
+twilio==7.16.0
 pytz
 sqlalchemy
 pydantic[dotenv]

@@ -3,6 +3,7 @@ from utils import cryptoUtil
 from sqlalchemy import and_
 from users import schemas as user_schema
 from auth import schemas as auth_schema
+from utils.passwordUtil import password_regex
 import models
 from models import current_date
 
@@ -23,15 +24,9 @@ async def update_user(
                 models.User.fullname: currentUser.fullname
                 if request.fullname is None
                 else request.fullname,
-                models.User.state: currentUser.state
-                if request.state is None
-                else request.state,
-                models.User.city: currentUser.city
-                if request.city is None
-                else request.city,
-                models.User.email: currentUser.email
-                if request.email is None
-                else request.email,
+                models.User.state: currentUser.state if request.state is None else request.state,
+                models.User.city: currentUser.city if request.city is None else request.city,
+                models.User.email: currentUser.email if request.email is None else request.email,
                 models.User.last_updated_on: current_date,
             }
         )
@@ -67,7 +62,11 @@ async def change_password(
             )
         )
         .update(
-            {models.User.password: cryptoUtil.get_password_hash(chgPwd.new_password)}
+            {
+                models.User.password: cryptoUtil.get_password_hash(
+                    password_regex(chgPwd.new_password)
+                )
+            }
         )
     )
     db.commit()
