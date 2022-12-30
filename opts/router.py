@@ -6,6 +6,7 @@ from opts import crud
 from utils.dbUtil import get_db
 from sqlalchemy.orm import Session
 from auth import crud as auth_crud
+from utils.twilioUtil import send_otp_twilio
 
 router = APIRouter(prefix="/api/v1")
 
@@ -28,11 +29,12 @@ async def send_otp(request: schemas.CreateOTP, db: Session = Depends(get_db)):
     session_id = str(uuid.uuid1())
     await crud.save_otp(db, request, session_id, otp_code)
 
-    # # Send OTP to email or phone
+    # # Send OTP to phone
+    send_otp_twilio(str(request.phone_number), otp_code)
 
     return {
         "code": 200,
-        "message": "We've sent an email with instructions to reset your password.",
+        "message": "We've sent an OTP to reset your password.",
         "session_id": session_id,
     }
 
@@ -51,9 +53,7 @@ async def verify_otp(request: schemas.VerifyOTP, db: Session = Depends(get_db)):
         )
 
     # Check OTP code 4 digit life time
-    otp_result = await crud.find_otp_life_time(
-        db, request.phone_number, request.session_id
-    )
+    otp_result = await crud.find_otp_life_time(db, request.phone_number, request.session_id)
     if not otp_result:
         raise HTTPException(
             status_code=404, detail="OTP code has expired, please request a new one."
@@ -61,9 +61,7 @@ async def verify_otp(request: schemas.VerifyOTP, db: Session = Depends(get_db)):
 
     # Check if OTP code is already used
     if otp_result.status is False:
-        raise HTTPException(
-            status_code=404, detail="OTP code has used, please request a new one."
-        )
+        raise HTTPException(status_code=404, detail="OTP code has used, please request a new one.")
 
     # Verify OTP code, if not verified,
     if otp_result.otp_code != request.otp_code:
@@ -82,14 +80,10 @@ async def verify_otp(request: schemas.VerifyOTP, db: Session = Depends(get_db)):
             )
 
         # Throw exceptions
-        raise HTTPException(
-            status_code=404, detail="The OTP code you've entered is incorrect."
-        )
+        raise HTTPException(status_code=404, detail="The OTP code you've entered is incorrect.")
 
     # Disable otp code when succeed verified
-    await crud.disable_otp(
-        db, otp_result.phone_number, otp_result.session_id, otp_result.otp_code
-    )
+    await crud.disable_otp(db, otp_result.phone_number, otp_result.session_id, otp_result.otp_code)
     if get_user.verify is False:
         await auth_crud.verify_user(db, request.phone_number)
 

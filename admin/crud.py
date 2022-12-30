@@ -9,8 +9,8 @@ from users import schemas as user_schema
 async def get_all_users(db: Session, page: int = 1, per_page: int = 100):
     return (
         db.query(models.User)
-        .filter(models.User.status == True)
-        .order_by(models.User.user_id)
+        .filter(and_(models.User.status == True, models.User.role == "User"))
+        .order_by(models.User.last_updated_on)
         .offset((page - 1) * per_page)
         .limit(per_page)
         .all()
@@ -55,15 +55,9 @@ async def update_user_admin(
                 models.User.fullname: currentUser.fullname
                 if request.fullname is None
                 else request.fullname,
-                models.User.state: currentUser.state
-                if request.state is None
-                else request.state,
-                models.User.city: currentUser.city
-                if request.city is None
-                else request.city,
-                models.User.email: currentUser.email
-                if request.email is None
-                else request.email,
+                models.User.state: currentUser.state if request.state is None else request.state,
+                models.User.city: currentUser.city if request.city is None else request.city,
+                models.User.email: currentUser.email if request.email is None else request.email,
             }
         )
     )

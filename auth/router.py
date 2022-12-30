@@ -7,6 +7,7 @@ from opts.router import send_otp, verify_otp, schemas as otp_schemas
 from utils import cryptoUtil, jwtUtil, constantUtil
 from utils.dbUtil import get_db
 from sqlalchemy.orm import Session
+from utils.passwordUtil import password_regex
 
 
 router = APIRouter(prefix="/api/v1")
@@ -20,7 +21,7 @@ async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="User already registered!")
 
     # Create new user
-    user.password = cryptoUtil.get_password_hash(user.password)
+    user.password = cryptoUtil.get_password_hash(password_regex(user.password))
     await crud.create_user(db, user)
     phone = otp_schemas.CreateOTP(phone_number=user.phone_number)
     result = await send_otp(phone, db)
@@ -28,9 +29,7 @@ async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 
 @router.post("/auth/login")
-async def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
-):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     # Checking if user exist in db
     user = await crud.get_user(db, phone_number=int(form_data.username))
     if not user:
@@ -41,9 +40,7 @@ async def login(
     if not is_valid:
         raise HTTPException(status_code=400, detail="Incorrect username or password!")
 
-    access_token_expires = jwtUtil.timedelta(
-        minutes=constantUtil.ACCESS_TOKEN_EXPIRE_MINUTES
-    )
+    access_token_expires = jwtUtil.timedelta(minutes=constantUtil.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = await jwtUtil.create_access_token(
         data={"sub": form_data.username},
         expires_delta=access_token_expires,
@@ -63,9 +60,7 @@ async def login(
 
 
 @router.post("/auth/forgot-password")
-async def forgot_password(
-    request: otp_schemas.CreateOTP, db: Session = Depends(get_db)
-):
+async def forgot_password(request: otp_schemas.CreateOTP, db: Session = Depends(get_db)):
     # Check existed user
     user = await crud.get_user(db, request.phone_number)
     if not user:
@@ -93,6 +88,6 @@ async def reset_password(
     await verify_otp(otp_request, db)
 
     # Reset new password
-    new_hash_password = cryptoUtil.get_password_hash(request.new_password)
+    new_hash_password = cryptoUtil.get_password_hash(password_regex(request.new_password))
     await crud.reset_password(db, new_hash_password, otp_request.phone_number)
     return {"code": 200, "message": "Password has been reset successfully"}
