@@ -6,13 +6,13 @@ from auth import schemas as auth_schema
 from users import schemas as user_schema
 
 
-async def get_all_users(db: Session, page: int = 1, per_page: int = 100):
+async def get_all_users(db: Session, skip: int = 0, limit: int = 100):
     return (
         db.query(models.User)
         .filter(and_(models.User.status == True, models.User.role == "User"))
         .order_by(models.User.last_updated_on)
-        .offset((page - 1) * per_page)
-        .limit(per_page)
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
@@ -40,7 +40,7 @@ async def find_existed_user_by_id(db: Session, user_id: UUID):
 
 
 async def update_user_admin(
-    db: Session, request: user_schema.UpdateUser, currentUser: auth_schema.UserList
+    db: Session, request: user_schema.AdminUpdateUser, currentUser: auth_schema.UserList
 ):
     query = (
         db.query(models.User)
@@ -58,6 +58,7 @@ async def update_user_admin(
                 models.User.state: currentUser.state if request.state is None else request.state,
                 models.User.city: currentUser.city if request.city is None else request.city,
                 models.User.email: currentUser.email if request.email is None else request.email,
+                models.User.status: True if request.status is None else request.status,
             }
         )
     )

@@ -2,12 +2,16 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.engine import URL
+from functools import lru_cache
 import os
 
 
-connection_string = os.environ["CONNECTION_STRING"]
+@lru_cache
+def connection_string():
+    return os.environ["CONNECTION_STRING"]
 
-connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string})
+
+connection_url = URL.create("mssql+pyodbc", query={"odbc_connect": connection_string()})
 
 # # Create the SQLAlchemy engine
 engine = create_engine(connection_url)

@@ -30,12 +30,6 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
-
-@app.get("/")
-async def index():
-    return "hello"
-
-
 app.include_router(auth_router.router, tags=["Auth"])
 app.include_router(user_router.router, tags=["User"])
 app.include_router(otp_router.router, tags=["OTP"])

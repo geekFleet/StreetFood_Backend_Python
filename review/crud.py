@@ -42,13 +42,13 @@ async def get_review_by_user_id(
     return query.first()
 
 
-async def get_all_review(db: Session, vendor_id: UUID, page: int = 1, per_page: int = 100):
+async def get_all_review(db: Session, vendor_id: UUID, skip: int = 0, limit: int = 100):
     return (
         db.query(models.Review)
         .filter(and_(models.Review.vendor_id == vendor_id, models.Review.status == True))
         .order_by(models.Review.last_updated_on)
-        .offset((page - 1) * per_page)
-        .limit(per_page)
+        .offset(skip)
+        .limit(limit)
         .all()
     )
 
