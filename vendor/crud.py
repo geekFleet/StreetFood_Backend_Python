@@ -70,12 +70,12 @@ async def update_vendor(
     return query
 
 
-async def get_all_vendor(db: Session, page: int = 1, per_page: int = 100):
+async def get_all_vendor(db: Session, skip: int = 0, limit: int = 100):
     return (
         db.query(models.Vendor)
         .filter(models.Vendor.status == True)
         .order_by(models.Vendor.vendor_id)
-        .offset((page - 1) * per_page)
-        .limit(per_page)
+        .offset(skip)
+        .limit(limit)
         .all()
     )

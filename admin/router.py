@@ -17,19 +17,19 @@ router = APIRouter(prefix="/api/v1")
 
 @router.get("/Admin/User/")
 async def get_all_users(
-    page: int = 1,
-    per_page: int = 100,
+    skip: int = 0,
+    limit: int = 100,
     db: Session = Depends(get_db),
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
 ):
     if currentUser.role == "Admin":
-        return await crud.get_all_users(db, page, per_page)
+        return await crud.get_all_users(db, skip, limit)
     return "No Admin right!"
 
 
 @router.patch("/Admin/user/{user_id}")
 async def update_user(
-    request: user_schema.UpdateUser,
+    request: user_schema.AdminUpdateUser,
     user_id: UUID,
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
     db: Session = Depends(get_db),
@@ -150,9 +150,7 @@ async def update_review(
         overall_rating = (
             review.taste + review.price_to_quality + review.hygiene + review.service
         ) / 4
-        await review_crud.update_overall_rating(
-            db, vendor_id, overall_rating, currentUser, user_id
-        )
+        await review_crud.update_overall_rating(db, vendor_id, overall_rating, currentUser, user_id)
         return {"status_code": 200, "detail": "Review updated successfully"}
     return "No Admin right!"
 

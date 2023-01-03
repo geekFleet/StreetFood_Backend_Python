@@ -98,9 +98,9 @@ async def get_overall_review_count_for_vendor(
 
 @router.get("/review/all")
 async def get_all_review_for_vendor(
-    vendor_id: UUID, page: int = 1, per_page: int = 100, db: Session = Depends(get_db)
+    vendor_id: UUID, skip: int = 0, limit: int = 100, db: Session = Depends(get_db)
 ):
-    review = await crud.get_all_review(db, vendor_id, page, per_page)
+    review = await crud.get_all_review(db, vendor_id, skip, limit)
     if not review:
         raise HTTPException(status_code=404, detail="Review doesnot extist!")
     return review
