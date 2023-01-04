@@ -17,4 +17,4 @@ def send_otp_twilio(phone_number: str, otp_code: int):
             to="+91" + phone_number,
         )
     except TwilioRestException as err:
-        logging.log(msg=err)
+        logging.exception(err)

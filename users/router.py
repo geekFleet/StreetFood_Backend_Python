@@ -65,9 +65,7 @@ async def upload_profile_image(
             os.mkdir(path_image_dir)
 
         # Rename file
-        file_name = full_image_path.replace(
-            file.filename, str(currentUser.user_id) + ".jpg"
-        )
+        file_name = full_image_path.replace(file.filename, str(currentUser.user_id) + ".jpg")
 
         # Write file
         with open(file_name, "wb+") as f:
@@ -79,7 +77,7 @@ async def upload_profile_image(
         return "Image uploaded Succesfully!"
 
     except Exception as e:
-        logging.log(e)
+        logging.exception(e)
 
 
 @router.post("/user/change-password")
