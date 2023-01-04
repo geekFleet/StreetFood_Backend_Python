@@ -11,10 +11,11 @@ client = Client(account_sid, auth_token)
 
 def send_otp_twilio(phone_number: str, otp_code: int):
     try:
-        client.messages.create(
+        message = client.messages.create(
             body=f"OTP from SteetFoods is {otp_code}",
             from_=from_number,
             to="+91" + phone_number,
         )
+        return message
     except TwilioRestException as err:
         logging.exception(err)
