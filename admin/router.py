@@ -27,6 +27,20 @@ async def get_all_users(
     return "No Admin right!"
 
 
+@router.get("/Admin/User/{user_id}")
+async def get_user_info(
+    user_id: UUID,
+    db: Session = Depends(get_db),
+    currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
+):
+    if currentUser.role == "Admin":
+        user_data = await crud.find_existed_user_by_id(db, user_id)
+        if not user_data:
+            return "User Not found"
+        return user_data
+    return "No Admin right!"
+
+
 @router.patch("/Admin/user/{user_id}")
 async def update_user(
     request: user_schema.AdminUpdateUser,
@@ -37,6 +51,8 @@ async def update_user(
     # Update user
     if currentUser.role == "Admin":
         user_data = await crud.find_existed_user_by_id(db, user_id)
+        if not user_data:
+            return "User Not found"
         user = auth_schema.UserList(
             user_id=user_data.user_id,
             email=user_data.email,
@@ -61,7 +77,8 @@ async def delete_users(
     currentUser: auth_schema.UserList = Depends(jwtUtil.get_current_active_user),
 ):
     if currentUser.role == "Admin":
-        return await crud.deleate_user(db, user_id)
+        await crud.deleate_user(db, user_id)
+        return "User deleted successfully"
     return "No Admin right!"
 
 
