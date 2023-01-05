@@ -7,14 +7,12 @@ from users import schemas as user_schema
 
 
 async def get_all_users(db: Session, skip: int = 0, limit: int = 100):
-    return (
-        db.query(models.User)
-        .filter(and_(models.User.status == True, models.User.role == "User"))
-        .order_by(models.User.last_updated_on)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+
+    query = db.query(models.User).filter(and_(models.User.role == "User"))
+    all_user = query.order_by(models.User.last_updated_on).offset(skip).limit(limit).all()
+    count = query.count()
+
+    return {"total_count": count, "query": all_user}
 
 
 async def deleate_user(db: Session, UserId: UUID):
@@ -71,7 +69,7 @@ async def delete_vendor(db: Session, vendor_id: UUID):
         db.query(models.Vendor)
         .filter(
             and_(
-                models.Vendor.user_id == vendor_id,
+                models.Vendor.vendor_id == vendor_id,
                 models.User.status == True,
             )
         )
