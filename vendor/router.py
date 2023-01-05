@@ -70,5 +70,4 @@ async def get_vendor_profile_by_id(
 
 @router.get("/vendor")
 async def get_all_vendors(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    vendors = await crud.get_all_vendor(db, skip, limit)
-    return vendors
+    return await crud.get_all_vendor(db, skip, limit)

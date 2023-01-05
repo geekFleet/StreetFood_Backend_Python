@@ -71,11 +71,8 @@ async def update_vendor(
 
 
 async def get_all_vendor(db: Session, skip: int = 0, limit: int = 100):
-    return (
-        db.query(models.Vendor)
-        .filter(models.Vendor.status == True)
-        .order_by(models.Vendor.vendor_id)
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+
+    query = db.query(models.Vendor).filter(models.Vendor.status == True)
+    all_vendor = query.order_by(models.Vendor.vendor_id).offset(skip).limit(limit).all()
+    count = query.count()
+    return {"total_count": count, "query": all_vendor}
