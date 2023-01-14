@@ -24,7 +24,12 @@ async def register(user: schemas.UserCreate, db: Session = Depends(get_db)):
     user.password = cryptoUtil.get_password_hash(password_regex(user.password))
     await crud.create_user(db, user)
     phone = otp_schemas.CreateOTP(phone_number=user.phone_number)
-    return {**user.dict()}
+    result = await send_otp(phone, db)
+    return {
+        "code": 200,
+        "detail": "User registered successfully!",
+        "data": {"user_info": {**user.dict()}, "session_id": result["data"]["session_id"]},
+    }
 
 
 @router.post("/auth/login")
@@ -44,17 +49,19 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
         data={"sub": form_data.username},
         expires_delta=access_token_expires,
     )
-    results = {"access_token": access_token, "token_type": "bearer"}
-
-    results.update(
-        {
+    results = {
+        "code": 200,
+        "detail": "User login successfully!",
+        "data": {
+            "access_token": access_token,
+            "token_type": "bearer",
             "user_info": {
                 "email": user.email,
                 "fullname": user.fullname,
                 "phone_number": user.phone_number,
-            }
-        }
-    )
+            },
+        },
+    }
     return results
 
 
@@ -68,8 +75,8 @@ async def forgot_password(request: otp_schemas.CreateOTP, db: Session = Depends(
     result = await send_otp(request, db)
     return {
         "code": 200,
-        "message": "We've sent an email with instructions to reset your password.",
-        "session_id": result.get("session_id"),
+        "detail": "We've sent an email with instructions to reset your password.",
+        "data": {"session_id": result.get("session_id")},
     }
 
 
@@ -81,7 +88,7 @@ async def reset_password(
 ):
     # Check both new & confirm password are matched
     if request.new_password != request.confirm_password:
-        raise HTTPException(status_code=404, detail="New password is not match.")
+        raise HTTPException(status_code=404, detail="password is not match.")
 
     # Verify Otp
     await verify_otp(otp_request, db)
@@ -89,4 +96,4 @@ async def reset_password(
     # Reset new password
     new_hash_password = cryptoUtil.get_password_hash(password_regex(request.new_password))
     await crud.reset_password(db, new_hash_password, otp_request.phone_number)
-    return {"code": 200, "message": "Password has been reset successfully"}
+    return {"code": 200, "detail": "Password has been reset successfully"}
