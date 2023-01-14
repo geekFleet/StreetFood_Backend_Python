@@ -7,9 +7,11 @@ from auth import schemas as auth_schema
 from models import current_date
 
 
-async def save_vendor(db: Session, user: schemas.RequestVendor, currentUser: auth_schema.UserList):
+async def save_vendor(
+    db: Session, vendor: schemas.RequestVendor, currentUser: auth_schema.UserList
+):
     db_item = models.Vendor(
-        **user.dict(),
+        **vendor.dict(),
         created_by=currentUser.user_id,
     )
     db.add(db_item)
@@ -75,4 +77,4 @@ async def get_all_vendor(db: Session, skip: int = 0, limit: int = 100):
     query = db.query(models.Vendor).filter(models.Vendor.status == True)
     all_vendor = query.order_by(models.Vendor.vendor_id).offset(skip).limit(limit).all()
     count = query.count()
-    return {"total_count": count, "query": all_vendor}
+    return {"total_count": count, "vendor_info": all_vendor}

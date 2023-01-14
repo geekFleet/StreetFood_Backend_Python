@@ -29,7 +29,11 @@ async def register(
     vendor = await crud.find_existed_vendor(db, user.vendor_name, user.location)
     overall_rating = (review.taste + review.service + review.hygiene + review.price_to_quality) / 4
     await review_crud.save_review(db, vendor.vendor_id, review, overall_rating, currentUser)
-    return {**user.dict()}, {**review.dict()}
+    return {
+        "code": 200,
+        "detail": "Vendoer and Review saved!",
+        "data": {"vendor_info": {**user.dict()}, "review_info": {**review.dict()}},
+    }
 
 
 @router.patch("/vendor/update")
@@ -53,7 +57,7 @@ async def update_vendor(
     )
     # Update user
     await crud.update_vendor(db, vendor_id, request, currentVendor)
-    return {"status_code": 200, "detail": "Vendor updated successfully"}
+    return {"code": 200, "detail": "Vendor updated successfully"}
 
 
 @router.get("/vendor/profile/{vendor_id}")
@@ -65,9 +69,10 @@ async def get_vendor_profile_by_id(
 
     if not currentVendor:
         raise HTTPException(status_code=404, detail="vendor doesnot extist!")
-    return currentVendor
+    return {"code": 200, "detail": "", "data": {"vendo_info": currentVendor}}
 
 
 @router.get("/vendor")
 async def get_all_vendors(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return await crud.get_all_vendor(db, skip, limit)
+    row = await crud.get_all_vendor(db, skip, limit)
+    return {"code": 200, "detail": "Vendor updated successfully", "data": row}

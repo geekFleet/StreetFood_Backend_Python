@@ -30,14 +30,14 @@ async def send_otp(request: schemas.CreateOTP, db: Session = Depends(get_db)):
     await crud.save_otp(db, request, session_id, otp_code)
 
     # # Send OTP to phone
-    message = send_otp_twilio(str(request.phone_number), otp_code)
-    if message:
-        return {
-            "code": 200,
-            "message": "We've sent an OTP to reset your password.",
+    detail = send_otp_twilio(str(request.phone_number), otp_code)
+    return {
+        "code": 200,
+        "detail": "We've sent an OTP to reset your password.",
+        "data": {
             "session_id": session_id,
-        }
-    return "Something went wrong!"
+        },
+    }
 
 
 @router.post("/otp/verify")
@@ -88,4 +88,4 @@ async def verify_otp(request: schemas.VerifyOTP, db: Session = Depends(get_db)):
     if get_user.verify is False:
         await auth_crud.verify_user(db, request.phone_number)
 
-    return {"status_code": 200, "detail": "OTP verified successfully"}
+    return {"code": 200, "detail": "OTP verified successfully"}
